@@ -24,15 +24,15 @@ class ViewController: UIViewController {
     
     func sampleData() {
                 
-               [
-                   App(id: 1, name: "First App", description: "This is first app"),
-                   App(id: 2, name: "Second App", description: "This is Second app"),
-                   App(id: 3, name: "Third App", description: "This is Third app"),
-                   App(id: 4, name: "Fourth App", description: "This is Fourth app")
-               ]
-               .forEach { apps.append($0)}
-               
-               dump(apps)
+//               [
+//                   App(id: 1, name: "First App", description: "This is first app"),
+//                   App(id: 2, name: "Second App", description: "This is Second app"),
+//                   App(id: 3, name: "Third App", description: "This is Third app"),
+//                   App(id: 4, name: "Fourth App", description: "This is Fourth app")
+//               ]
+//               .forEach { apps.append($0)}
+//               
+//               dump(apps)
                
 //               guard let app = apps.first(where: { $0.name == "Second App" }) else {fatalError()}
 //               print(app.description)

@@ -5,14 +5,14 @@
 //  Created by Steven Hertz on 3/7/20.
 //  Copyright © 2020 DevelopItSolutions. All rights reserved.
 //
-
+import Foundation
 struct App: Codable {
     
       public let id: Int
-    // ™public let locationId: Int
+    //  public let locationId: Int
     //  public let isBook: Bool
     //  public let bundleId: String
-    //  public let icon: URL
+    public let icon: URL
     public let name: String
     //  public let version: Date
     //  public let shortVersion: String
