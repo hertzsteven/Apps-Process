@@ -10,11 +10,14 @@ import Foundation
 
 enum Literals{
     static var profileKiosk: String  = { return "Profile-App-1Kiosk" }()
+    static var deviceGroupKiosk: String  = { return "DG -1Kiosk" }()
 }
 
 class MyRequestController {
     var apps = [App]()
     var kioskProfiles = [Profile]()
+    var kioskDeviceGroups = [DeviceGroup]()
+
     
     func sendRequestProfiles() {
         let sessionConfig = URLSessionConfiguration.default
@@ -51,6 +54,50 @@ class MyRequestController {
                     print(profile.name)
                 }
                 self.sendRequest()
+            }
+            catch {
+                print(error.localizedDescription)
+            }
+        })
+        task.resume()
+        session.finishTasksAndInvalidate()
+    }
+
+    func sendRequestDeviceGroups() {
+        let sessionConfig = URLSessionConfiguration.default
+
+        /* Create session, and optionally set a URLSessionDelegate. */
+        let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
+
+        /* Create the Request:
+           get List of DeviceGroups (GET https://api.zuludesk.com/profiles)
+         */
+
+        guard var URL = URL(string: "https://api.zuludesk.com/devices/groups") else {return}
+         var request = URLRequest(url: URL)
+         request.httpMethod = "GET"
+
+         // Headers
+
+         request.addValue("Basic NTM3MjI0NjA6RVBUTlpaVEdYV1U1VEo0Vk5RUDMyWDVZSEpSVjYyMkU=", forHTTPHeaderField: "Authorization")
+         request.addValue("2", forHTTPHeaderField: "X-Server-Protocol-Version")
+         request.addValue("__cfduid=d6d36b16a88dbdafd9bdc5ba8668ecd911572791940; Hash=f59c9e4a0632aed5aa32c482301cfbc0", forHTTPHeaderField: "Cookie")
+
+        /* Start a new Task */
+        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
+            guard let data = data,  (error == nil) else  {fatalError() }
+            // Success
+            let statusCode = (response as! HTTPURLResponse).statusCode
+            print("URL Session Task Succeeded: HTTP \(statusCode)")
+
+            let jsonDecoder = JSONDecoder()
+            
+            do { let deviceGroupStore = try jsonDecoder.decode(DeviceGroupStore.self, from: data)
+                self.kioskDeviceGroups = deviceGroupStore.deviceGroups.filter { $0.name.starts(with: Literals.deviceGroupKiosk) }
+                for deviceGroup in self.kioskDeviceGroups {
+                    print(deviceGroup.name)
+                }
+                 self.sendRequest()
             }
             catch {
                 print(error.localizedDescription)
@@ -103,12 +150,17 @@ class MyRequestController {
                 
                 print(String(repeating: "- - -", count: 30))
                 
-                self.kioskProfiles.forEach { (profile) in
-                    let appName = profile.name.replacingOccurrences(of: "Profile-App-1Kiosk ", with: "")
+                self.kioskDeviceGroups.forEach { (deviceGroup) in
+                    let appName = deviceGroup.name.replacingOccurrences(of: Literals.deviceGroupKiosk + " ", with: "")
                     if let ap = appStore.apps.first(where: { $0.name == appName }) {
                         print(ap.name)
                     } else {
                         print(String(repeating: "- - -", count: 5), "Not Found \(appName)")
+                        
+                        if let apx = appStore.apps.first(where: { $0.name == deviceGroup.description }) {
+                                                   print(apx.name, " We found it")
+                         }
+                        
                     }
                 }
             

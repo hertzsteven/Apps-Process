@@ -17,7 +17,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         let myRequestController = MyRequestController()
-        myRequestController.sendRequestProfiles()
+        myRequestController.sendRequestDeviceGroups()
         
         
     }
