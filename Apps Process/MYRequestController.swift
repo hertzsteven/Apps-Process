@@ -26,40 +26,44 @@ enum Literals{
 }
 
 class MyRequestController {
+   
     var dbs : CKDatabase {
         return CKContainer(identifier: "iCloud.com.dia.cloudKitExample.open").publicCloudDatabase
     }
 
-    
     var apps = [App]()
     var kioskProfiles = [Profile]()
     var kioskDeviceGroups = [DeviceGroup]()
-
     
     func sendRequestProfiles() {
-        let sessionConfig = URLSessionConfiguration.default
 
-        /* Create session, and optionally set a URLSessionDelegate. */
-        let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
-
-        /* Create the Request:
-           get List of Profiles (GET https://api.zuludesk.com/profiles)
-         */
-
-        guard let URL = URL(string: "https://api.zuludesk.com/profiles") else {return}
-        var request = URLRequest(url: URL)
-        request.httpMethod = "GET"
-
-        // Headers
-
-        request.addValue("Basic NTM3MjI0NjA6RVBUTlpaVEdYV1U1VEo0Vk5RUDMyWDVZSEpSVjYyMkU=", forHTTPHeaderField: "Authorization")
-        request.addValue("2", forHTTPHeaderField: "X-Server-Protocol-Version")
-        request.addValue("__cfduid=d6d36b16a88dbdafd9bdc5ba8668ecd911572791940; Hash=f59c9e4a0632aed5aa32c482301cfbc0", forHTTPHeaderField: "Cookie")
-
+        let session: URLSession = {
+            let sessionConfig = URLSessionConfiguration.default
+            let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
+            return session
+        }()
+ 
+        let request: URLRequest = {
+            /// create request
+            guard let URL = URL(string: "https://api.zuludesk.com/profiles") else {fatalError("Could not create the url")}
+            var request = URLRequest(url: URL)
+            /// modify properties
+            request.httpMethod = "GET"
+            /// Header
+            request.addValue("Basic NTM3MjI0NjA6RVBUTlpaVEdYV1U1VEo0Vk5RUDMyWDVZSEpSVjYyMkU=", forHTTPHeaderField: "Authorization")
+            request.addValue("2", forHTTPHeaderField: "X-Server-Protocol-Version")
+            request.addValue("__cfduid=d6d36b16a88dbdafd9bdc5ba8668ecd911572791940; Hash=f59c9e4a0632aed5aa32c482301cfbc0", forHTTPHeaderField: "Cookie")
+            
+            return request
+        }()
+        
         /* Start a new Task */
         let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
-            guard let data = data,  (error == nil) else  {fatalError() }
-            // Success
+            
+            /// check if it was a success
+            guard let data = data,(error == nil) else { fatalError("Failed at the task getting the profiles") }
+
+            // Success - contine
             let statusCode = (response as! HTTPURLResponse).statusCode
             print("URL Session Task Succeeded: HTTP \(statusCode)")
 
@@ -70,7 +74,6 @@ class MyRequestController {
                 for profile in self.kioskProfiles {
                     print(profile.name)
                 }
-                self.sendRequest()
             }
             catch {
                 print(error.localizedDescription)
@@ -169,7 +172,7 @@ class MyRequestController {
                 for deviceGroup in self.kioskDeviceGroups {
                     print(deviceGroup.name)
                 }
-                 self.sendRequest()
+                 self.getAppsToSaveTheirIcons()
             }
             catch {
                 print(error.localizedDescription)
@@ -180,7 +183,7 @@ class MyRequestController {
     }
 
     
-    func sendRequest() {
+    func getAppsToSaveTheirIcons() {
         /* Configure session, choose between:
          * defaultSessionConfiguration
          * ephemeralSessionConfiguration
@@ -227,9 +230,9 @@ class MyRequestController {
                     
                     if let ap = appStore.apps.first(where: { $0.name == appName }) {
                         print(ap.name)
-//                        DispatchQueue.main.async {
-//                            self.getTheImage(with: ap.icon, appName: appName, appid: String(deviceGroup.id))
-//                        }
+                        DispatchQueue.main.async {
+                            self.getTheImage(with: ap.icon, appName: appName, appid: String(deviceGroup.id))
+                        }
                     } else {
                         print(String(repeating: "- - -", count: 5), "Not Found \(appName)")
                         if let apx = appStore.apps.first(where: { $0.name == deviceGroup.description }) {
@@ -249,6 +252,8 @@ class MyRequestController {
         task.resume()
         session.finishTasksAndInvalidate()
     }
+
+
     func getTheImage(with url: URL, appName: String, appid: String)  {
         print(url.lastPathComponent)
         let sessionConfig = URLSessionConfiguration.default
