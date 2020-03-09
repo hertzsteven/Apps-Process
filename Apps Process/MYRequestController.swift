@@ -7,13 +7,28 @@
 //
 
 import Foundation
+import CloudKit
+
+
 
 enum Literals{
     static var profileKiosk: String  = { return "Profile-App-1Kiosk" }()
     static var deviceGroupKiosk: String  = { return "DG -1Kiosk" }()
+    
+    static var appRecordType: String  = { return "App" }()
+    static var appID: String  = { return "id" }()
+    static var appname: String  = { return "name" }()
+    static var appicon: String  = { return "icon" }()
+    
+    
 }
 
 class MyRequestController {
+    var dbs : CKDatabase {
+        return CKContainer(identifier: "iCloud.com.dia.cloudKitExample.open").publicCloudDatabase
+    }
+
+    
     var apps = [App]()
     var kioskProfiles = [Profile]()
     var kioskDeviceGroups = [DeviceGroup]()
@@ -63,7 +78,59 @@ class MyRequestController {
         session.finishTasksAndInvalidate()
     }
 
+    
+    func sendRequestUsers() {
+        let sessionConfig = URLSessionConfiguration.default
+
+        /* Create session, and optionally set a URLSessionDelegate. */
+        let session = URLSession(configuration: sessionConfig, delegate: nil, delegateQueue: nil)
+
+        /* Create the Request:
+           get List of Profiles (GET https://api.zuludesk.com/profiles)
+         */
+
+  
+        let item = URLQueryItem(name: "memberOf", value: "17,18,19,20,21,22,29")
+        var queryItemsArray = [URLQueryItem]()
+        queryItemsArray.append(item)
+        
+        var urlComp =  URLComponents(string: "https://api.zuludesk.com/users")
+        urlComp?.queryItems = queryItemsArray
+        guard let theurl = urlComp?.url else { fatalError("url componenets error")}
+
+        var request = URLRequest(url: theurl)
+        request.httpMethod = "GET"
+        
+        // Headers
+        request.addValue("Basic NTM3MjI0NjA6RVBUTlpaVEdYV1U1VEo0Vk5RUDMyWDVZSEpSVjYyMkU=", forHTTPHeaderField: "Authorization")
+        request.addValue("1", forHTTPHeaderField: "X-Server-Protocol-Version")
+        
+        /* Start a new Task */
+        let task = session.dataTask(with: request, completionHandler: { (data: Data?, response: URLResponse?, error: Error?) -> Void in
+            guard let data = data,  (error == nil) else  {fatalError() }
+            // Success
+            let statusCode = (response as! HTTPURLResponse).statusCode
+            print("URL Session Task Succeeded: HTTP \(statusCode)")
+            
+            let jsonDecoder = JSONDecoder()
+            
+            do { let userStore = try jsonDecoder.decode(UserStore.self, from: data)
+                // self.kioskDeviceGroups = userStore.users.filter { $0.name.starts(with: Literals.userKiosk) }
+                for user in userStore.users {
+                    print(user.lastName)
+                }
+            }
+            catch {
+                print(error.localizedDescription)
+            }
+        })
+        task.resume()
+        session.finishTasksAndInvalidate()
+    }
+
+
     func sendRequestDeviceGroups() {
+        
         let sessionConfig = URLSessionConfiguration.default
 
         /* Create session, and optionally set a URLSessionDelegate. */
@@ -140,7 +207,7 @@ class MyRequestController {
             // Success
             let statusCode = (response as! HTTPURLResponse).statusCode
             print("URL Session Task Succeeded: HTTP \(statusCode)")
-
+            
             let jsonDecoder = JSONDecoder()
             
             do { let appStore = try jsonDecoder.decode(AppStore.self, from: data)
@@ -152,24 +219,24 @@ class MyRequestController {
                 
                 self.kioskDeviceGroups.forEach { (deviceGroup) in
                     let appName = deviceGroup.name.replacingOccurrences(of: Literals.deviceGroupKiosk + " ", with: "")
+                    
                     if let ap = appStore.apps.first(where: { $0.name == appName }) {
                         print(ap.name)
-                        DispatchQueue.main.async {
-                            self.getTheImage(with: ap.icon, appName: ap.name)
-                        }
-                        
+//                        DispatchQueue.main.async {
+//                            self.getTheImage(with: ap.icon, appName: appName, appid: String(deviceGroup.id))
+//                        }
                     } else {
                         print(String(repeating: "- - -", count: 5), "Not Found \(appName)")
-                        
                         if let apx = appStore.apps.first(where: { $0.name == deviceGroup.description }) {
-                                                   print(apx.name, " We found it")
-                         }
+                            DispatchQueue.main.async {
+                                self.getTheImage(with: apx.icon, appName: appName, appid: String(deviceGroup.id))
+                            }
+                            print(apx.name, " We found it")
+                        }
                         
                     }
                 }
-            
-                
-            }
+             }
             catch {
                 print(error.localizedDescription)
             }
@@ -177,7 +244,7 @@ class MyRequestController {
         task.resume()
         session.finishTasksAndInvalidate()
     }
-    func getTheImage(with url: URL, appName: String)  {
+    func getTheImage(with url: URL, appName: String, appid: String)  {
         print(url.lastPathComponent)
         let sessionConfig = URLSessionConfiguration.default
         
@@ -204,6 +271,9 @@ class MyRequestController {
 
             do {
                 try data.write(to: filename)
+                DispatchQueue.main.async {
+                    self.addAppRecord(id: appid, name: appName, fileURL: filename)
+                }
             } catch {
                 // failed to write file – bad permissions, bad filename, missing permissions, or more likely it can't be converted to the encoding
                 print(error.localizedDescription)
@@ -220,6 +290,34 @@ class MyRequestController {
         print(paths[0])
         return paths[0]
     }
+    
+    fileprivate func addAppRecord(id: String, name: String, fileURL: URL?) {
+
+        // make a record
+        
+        let recordID = CKRecord.ID(recordName: name)
+        let record = CKRecord(recordType:  Literals.appRecordType, recordID: recordID)
+        
+        // record.recordID = recordID
+        
+        record[Literals.appID] = NSString(utf8String: id)
+        record[Literals.appname] =  NSString(utf8String: name)
+        if let fileURL = fileURL  {
+            let asset = CKAsset(fileURL: fileURL)
+            record[Literals.appicon] = asset
+        }
+        // record[Literals.appicon] =   NSString("qqqq")
+        
+        dbs.save(record) { (record, error) in
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+            print("added succesfully")
+            print(record as Any)
+        }
+    }
+
     
 }
 

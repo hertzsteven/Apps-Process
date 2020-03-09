@@ -7,21 +7,71 @@
 //
 
 import UIKit
+import CloudKit
 
 class ViewController: UIViewController {
+
+    var dbs : CKDatabase {
+          return CKContainer(identifier: "iCloud.com.dia.cloudKitExample.open").publicCloudDatabase
+      }
     
     var apps = [App]()
     var x = [1,2,3,4,5]
     
+    
+    @IBOutlet weak var iconImage: UIImageView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        // addRecord()
+        // getAppRecord()
         
         let myRequestController = MyRequestController()
-        myRequestController.sendRequestDeviceGroups()
+        myRequestController.sendRequestUsers()
         
         
     }
     
+    func getAppRecord()  {
+        // make a ckrecordid
+        let recordID = CKRecord.ID(recordName: "Butterfly Math")
+        
+        dbs.fetch(withRecordID: recordID) { (record, error) in
+            guard let record = record, error == nil else { fatalError("could not get record") }
+            
+            if let asset = record["icon"] as? CKAsset {
+                print(asset.fileURL?.absoluteString)
+                DispatchQueue.main.async {
+                    self.iconImage.image = UIImage(contentsOfFile: asset.fileURL!.path)
+                }
+            }
+            
+            
+        }
+
+        
+        // do the fetch
+        
+    }
+    fileprivate func addRecord() {
+        // Do any additional setup after loading the view.
+        
+        // make a ckrecord
+        let record = CKRecord(recordType: "iPad")
+        record["currentUser"] = NSString("Mevy")
+        record["identifier"] =  NSString("qqqq")
+        record["userLevel"] =   NSString("qqqq")
+        
+        dbs.save(record) { (record, error) in
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+            print("added succesfully")
+            print(record as Any)
+        }
+    }
+
     func sampleData() {
                 
 //               [

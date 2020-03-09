@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4656032A24155BFB00B2C177 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4656032924155BFB00B2C177 /* CloudKit.framework */; };
+		4656032C2415DC9B00B2C177 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4656032B2415DC9B00B2C177 /* User.swift */; };
+		4656032E2415DDC300B2C177 /* UserStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4656032D2415DDC300B2C177 /* UserStore.swift */; };
 		46C8631B241513A500863B6A /* MYRequestController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46C8631A241513A500863B6A /* MYRequestController.swift */; };
 		46C8631D2415154A00863B6A /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46C8631C2415154A00863B6A /* AppStore.swift */; };
 		46C8631F24151B8800863B6A /* AppStoreJSon.json in Resources */ = {isa = PBXBuildFile; fileRef = 46C8631E24151B8800863B6A /* AppStoreJSon.json */; };
@@ -24,6 +27,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4656032724155BF400B2C177 /* Apps Process.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Apps Process.entitlements"; sourceTree = "<group>"; };
+		4656032924155BFB00B2C177 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
+		4656032B2415DC9B00B2C177 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		4656032D2415DDC300B2C177 /* UserStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStore.swift; sourceTree = "<group>"; };
 		46C8631A241513A500863B6A /* MYRequestController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MYRequestController.swift; sourceTree = "<group>"; };
 		46C8631C2415154A00863B6A /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
 		46C8631E24151B8800863B6A /* AppStoreJSon.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = AppStoreJSon.json; sourceTree = "<group>"; };
@@ -47,12 +54,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4656032A24155BFB00B2C177 /* CloudKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4656032824155BFB00B2C177 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4656032924155BFB00B2C177 /* CloudKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		46D81EF724153255009560A6 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -61,6 +77,8 @@
 				46C86322241521EB00863B6A /* ProfileStore.swift */,
 				46C8631C2415154A00863B6A /* AppStore.swift */,
 				46D81EFA241534E4009560A6 /* DeviceGroupStore.swift */,
+				4656032D2415DDC300B2C177 /* UserStore.swift */,
+				4656032B2415DC9B00B2C177 /* User.swift */,
 				46D81EF82415335F009560A6 /* DeviceGroup.swift */,
 			);
 			path = Models;
@@ -71,6 +89,7 @@
 			children = (
 				46F56BB02414994300E79382 /* Apps Process */,
 				46F56BAF2414994300E79382 /* Products */,
+				4656032824155BFB00B2C177 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -85,6 +104,7 @@
 		46F56BB02414994300E79382 /* Apps Process */ = {
 			isa = PBXGroup;
 			children = (
+				4656032724155BF400B2C177 /* Apps Process.entitlements */,
 				46F56BB12414994300E79382 /* AppDelegate.swift */,
 				46F56BB32414994300E79382 /* SceneDelegate.swift */,
 				46F56BB52414994300E79382 /* ViewController.swift */,
@@ -174,8 +194,10 @@
 				46F56BB62414994300E79382 /* ViewController.swift in Sources */,
 				46F56BC62414996400E79382 /* App.swift in Sources */,
 				46F56BB22414994300E79382 /* AppDelegate.swift in Sources */,
+				4656032C2415DC9B00B2C177 /* User.swift in Sources */,
 				46C86323241521EB00863B6A /* ProfileStore.swift in Sources */,
 				46D81EF92415335F009560A6 /* DeviceGroup.swift in Sources */,
+				4656032E2415DDC300B2C177 /* UserStore.swift in Sources */,
 				46C863212415217A00863B6A /* Profile.swift in Sources */,
 				46C8631D2415154A00863B6A /* AppStore.swift in Sources */,
 				46D81EFB241534E4009560A6 /* DeviceGroupStore.swift in Sources */,
@@ -324,6 +346,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Apps Process/Apps Process.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = MZ552MTEJZ;
 				INFOPLIST_FILE = "Apps Process/Info.plist";
@@ -342,6 +365,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Apps Process/Apps Process.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = MZ552MTEJZ;
 				INFOPLIST_FILE = "Apps Process/Info.plist";
