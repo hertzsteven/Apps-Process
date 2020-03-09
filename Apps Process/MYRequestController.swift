@@ -16,6 +16,8 @@ enum Literals{
     static var deviceGroupKiosk: String  = { return "DG -1Kiosk" }()
     
     static var appRecordType: String  = { return "App" }()
+    static var userRecordType: String  = { return "User" }()
+    
     static var appID: String  = { return "id" }()
     static var appname: String  = { return "name" }()
     static var appicon: String  = { return "icon" }()
@@ -44,7 +46,7 @@ class MyRequestController {
            get List of Profiles (GET https://api.zuludesk.com/profiles)
          */
 
-        guard var URL = URL(string: "https://api.zuludesk.com/profiles") else {return}
+        guard let URL = URL(string: "https://api.zuludesk.com/profiles") else {return}
         var request = URLRequest(url: URL)
         request.httpMethod = "GET"
 
@@ -118,6 +120,9 @@ class MyRequestController {
                 // self.kioskDeviceGroups = userStore.users.filter { $0.name.starts(with: Literals.userKiosk) }
                 for user in userStore.users {
                     print(user.lastName)
+                    DispatchQueue.main.async {
+                        self.addUserRecord(user: user, fileURL: nil)
+                    }
                 }
             }
             catch {
@@ -140,7 +145,7 @@ class MyRequestController {
            get List of DeviceGroups (GET https://api.zuludesk.com/profiles)
          */
 
-        guard var URL = URL(string: "https://api.zuludesk.com/devices/groups") else {return}
+        guard let URL = URL(string: "https://api.zuludesk.com/devices/groups") else {return}
          var request = URLRequest(url: URL)
          request.httpMethod = "GET"
 
@@ -291,34 +296,62 @@ class MyRequestController {
         return paths[0]
     }
     
+    
     fileprivate func addAppRecord(id: String, name: String, fileURL: URL?) {
 
-        // make a record
-        
+        /// make a record
         let recordID = CKRecord.ID(recordName: name)
         let record = CKRecord(recordType:  Literals.appRecordType, recordID: recordID)
         
-        // record.recordID = recordID
-        
+        /// populate the fields
         record[Literals.appID] = NSString(utf8String: id)
         record[Literals.appname] =  NSString(utf8String: name)
         if let fileURL = fileURL  {
             let asset = CKAsset(fileURL: fileURL)
             record[Literals.appicon] = asset
         }
-        // record[Literals.appicon] =   NSString("qqqq")
-        
+                
         dbs.save(record) { (record, error) in
-            if let error = error {
-                print(error.localizedDescription)
-                return
-            }
+            guard let record = record, error == nil else {print(error?.localizedDescription as Any); return}
+
+            print("added succesfully")
+            print(record as Any)
+        }
+    }
+    fileprivate func addUserRecord(user: User, fileURL: URL?) {
+        
+        /// make a record
+        let recordID = CKRecord.ID(recordName: user.username)
+        let record = CKRecord(recordType:  Literals.userRecordType, recordID: recordID)
+        
+        /// populate the fields
+        record["id"] = NSNumber(value: user.id)
+        record["locationId"] = NSNumber(value: user.locationId)
+        record["email"] = NSString(utf8String: user.email)
+        record["username"] = NSString(utf8String: user.username)
+        record["firstName"] = NSString(utf8String: user.firstName)
+        record["lastName"] = NSString(utf8String: user.lastName)
+        
+        var groupIds = [NSNumber]()
+        for theItem in user.groupIds {
+            groupIds.append(NSNumber(value: theItem))
+        }
+        
+        record["groupIds"] =  groupIds
+
+//        if let fileURL = fileURL  {
+//            let asset = CKAsset(fileURL: fileURL)
+//            record[Literals.appicon] = asset
+//        }
+//
+        dbs.save(record) { (record, error) in
+            guard let record = record, error == nil else {print(error?.localizedDescription as Any); return}
+            
             print("added succesfully")
             print(record as Any)
         }
     }
 
-    
 }
 
 

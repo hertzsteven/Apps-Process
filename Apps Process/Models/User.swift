@@ -10,7 +10,7 @@ import Foundation
 struct User: Codable {
     
     public let id: Int
-//    public let locationId: Int
+    public let locationId: Int
 //    public let status: String
 //    public let deviceCount: Int
     public let email: String
@@ -18,7 +18,7 @@ struct User: Codable {
 //    public let domain: String
     public let firstName: String
     public let lastName: String
-//    public let groupIds: [Int]
+    public let groupIds: [Int]
 //    public let groups: [String]
 //    public let teacherGroups: [Any] //TODO: Specify the type to conforms Codable protocol
 //    public let children: [Any] //TODO: Specify the type to conforms Codable protocol
